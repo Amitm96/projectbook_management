@@ -87,7 +87,7 @@ project3
   - By category
   - By subcategory
   example of a query url: books?filtername=filtervalue&f2=fv2
-- Return all books sorted by book name in Alphabatical order
+- Return all books sorted by book name in Alphabatical order 
 
 ### GET /books/:bookId
 - Returns a book with complete details including reviews. Reviews array would be in the form of Array. Response example [here](#book-details-response)
