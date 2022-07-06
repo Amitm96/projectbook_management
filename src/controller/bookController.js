@@ -1,5 +1,5 @@
 const booksModel = require("../model/booksModel");
-
+const moment = require('moment')
 
 
 //=========================================== 1-Create Book Api ====================================================//
@@ -10,10 +10,9 @@ const createBook = async function (req, res) {
     const data=req.body;
     const {title,  excerpt, ISBN, category, subcategory, reviews, releasedAt}=data 
     
+    data.releasedAt = new Date()
     let savedData = await booksModel.create(data)
-    if(savedData){
-        savedData.releasedAt=new Date()
-    }
+    
     res.status(201).send({ status: true, data: savedData })
   }
   catch (err) {
