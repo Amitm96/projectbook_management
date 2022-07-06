@@ -42,7 +42,7 @@ project3
   isDeleted: {boolean, default: false},
   releasedAt: {Date, mandatory, format("YYYY-MM-DD")},
   createdAt: {timestamp},
-  updatedAt: {timestamp},
+  updatedAt: {timestamp}
 }
 ```
 
