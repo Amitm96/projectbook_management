@@ -8,5 +8,5 @@ router.post('/login', loginUser)
 
 router.post('/books', createBook)
 router.get("/books", getBooks)
-router.put('books/:bookId' , updateBooks)
+router.put('/books/:bookId' , updateBooks)
 module.exports=router;
