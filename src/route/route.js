@@ -1,11 +1,19 @@
 const express=require('express');
 const router=express.Router();
 const {createUser, loginUser}=require('../controller/userController')
-const {createBook ,getBooks}=require('../controller/bookController')
+const {createBook ,getBooks, deleteBooks}=require('../controller/bookController')
+const {authenticate, authorise}=require("../middleware/auth")
+const  { booksValidations }=require("../validations/bookValidations")
+const  { userValidations }=require("../validations/userValidations")
 
-router.post('/register', createUser)
-router.post('/login', loginUser)
 
-router.post('/books', createBook)
+
+router.post('/register',userValidations, createUser)
+router.post('/login', loginUser) 
+
+router.post('/books',booksValidations, authenticate,authorise, createBook) 
 router.get("/books", getBooks)
+
+router.delete('/books/:bookId',authenticate,authorise, deleteBooks) 
+
 module.exports=router;
