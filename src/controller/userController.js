@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 
 
-//=========================================== 1-Create Author Api ====================================================//
+//=========================================== 1-Create User Api ====================================================//
 
 
 const createUser = async function (req, res) {
@@ -37,7 +37,7 @@ const loginUser = async function (req, res) {
 
     //Token generation
     let token = jwt.sign({
-      authorId: user._id.toString(),
+      userId: user._id.toString(),
       iat: Math.floor(Date.now()/1000),
       exp: Math.floor(Date.now()/1000)+ 3600
     },

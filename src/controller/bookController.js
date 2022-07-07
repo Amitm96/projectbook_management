@@ -1,7 +1,6 @@
 const booksModel = require("../model/booksModel");
-const moment = require('moment')
-
-
+const moment = require("moment");
+const {isValidBody , isValid , isValidObjectId} = require('../validations/bookValidations')
 //=========================================== 1-Create Book Api ====================================================//
 
 
@@ -10,7 +9,7 @@ const createBook = async function (req, res) {
     const data = req.body;
     const { title, excerpt, ISBN, category, subcategory, reviews } = data
 
-    data.releasedAt = moment(Date.now()).format('YYYY-M-d')
+    data.releasedAt = Date.now()
     console.log(data.releasedAt)
     let savedData = await booksModel.create(data)
 
@@ -28,9 +27,6 @@ const getBooks = async function (req, res) {
   const { userId, category, subcategory } = query;
 
   let filter = { isDeleted: false }
-
-
-
 
   if (userId) {
     filter.userId = query.userId
@@ -52,8 +48,10 @@ const getBooks = async function (req, res) {
 
 const updateBooks = async function (req, res) {
   try {
+    if(!isValidBody(req.body)) return res.status(400).send({status: false , message: "enter data to be updated"})
     let { title, excerpt, releasedAt, ISBN } = req.body
     let bookId = req.params.bookId
+    if(!isValidObjectId(bookId)) return res.status(400).send({status: false , message: "please enter valid bookid"})
     let book = await booksModel.findById(bookId)
     if (!book) return res.status(404).send({ status: false, message: "book is not present in db" })
     if (book.isDeleted) return res.status(400).send({ status: false, message: "book is already deleted" })
@@ -62,16 +60,16 @@ const updateBooks = async function (req, res) {
     let bookisbn = await booksModel.findOne({ ISBN: ISBN })
     if (bookisbn) return res.status(400).send({ status: false, message: "book isbn is already present" })
 
-    if (title) {
+    if (isValid(title)) {
       book.title = title
     }
-    if (excerpt) {
+    if (isValid(excerpt)) {
       book.excerpt = excerpt
     }
-    if (releasedAt) {
+    if (isValid(releasedAt)) {
       book.releasedAt = releasedAt
     }
-    if (ISBN) {
+    if (isValid(ISBN)) {
       book.ISBN = ISBN
     }
     book.save()
@@ -82,5 +80,29 @@ const updateBooks = async function (req, res) {
   }
   }
   
+//====================================== 6-DeletedBooks By Path Param Id =============================================//
 
-module.exports = { createBook, getBooks, updateBooks }
+
+let deleteBooks = async function (req, res) {
+  try {
+    let id = req.params.bookId
+
+    //finding id in database  
+    let idvalidation = await booksModel.findById(id)
+
+    if (idvalidation.isDeleted == true) {
+      return res.status(404).send({ status: false, message: "Book already Deleted" })
+    }
+
+    if (idvalidation.isDeleted == false) {
+      let validation = await booksModel.findOneAndUpdate({ _id: id }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+    }
+    return res.status(200).send({ status: true, message: "Successfully Deleted" })
+
+  }
+  catch (err) {
+    res.status(500).send({ status: false, msg: err.message });
+  }
+}
+
+module.exports = { createBook, getBooks, deleteBooks , updateBooks}
