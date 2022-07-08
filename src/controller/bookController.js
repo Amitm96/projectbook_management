@@ -46,6 +46,35 @@ const getBooks = async function (req, res) {
 
 }
 
+const getById = async function(req,res){
+  let id =req.params.bookId
+  
+  let find = await booksModel.findById({_id:id})
+  //select({_id:1,title:1,excerpt:1,userId:1,category:1,isDeleted:1,reviews:1,releasedAt:1,ISBN:0})
+  //res.send({status:true,message:'Books list',data:find})
+ 
+ let object ={
+  _id: find._id,
+  title:find.title,
+  excerpt:find.excerpt,
+  userId: find.userId,
+  category: find.category,
+  isDeleted:find.isDeleted,
+  reviews: find.reviews,
+  releasedAt: find.releasedAt,
+  createdAt: find.createdAt,
+  updatedAt: find.updatedAt
+
+
+ }
+  let review = await reviewModel.find({bookId:id})
+   
+   object.reviewsData=review
+   let result ={object,review}
+   res.send({status:true,message:'Books list',data:result}) 
+
+}
+
 const updateBooks = async function (req, res) {
   try {
     if(!isValidBody(req.body)) return res.status(400).send({status: false , message: "enter data to be updated"})
@@ -105,4 +134,4 @@ let deleteBooks = async function (req, res) {
   }
 }
 
-module.exports = { createBook, getBooks, deleteBooks , updateBooks}
+module.exports = { createBook, getBooks, getById , deleteBooks , updateBooks}
