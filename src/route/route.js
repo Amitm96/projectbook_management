@@ -11,10 +11,10 @@ const  { userValidations }=require("../validations/userValidations")
 router.post('/register',userValidations, createUser)
 router.post('/login', loginUser) 
 
-router.post('/books',booksValidations, authenticate,authorise, createBook) 
+router.post('/books',booksValidations, createBook) 
 router.get('/books', getBooks)
 router.get('/books/:bookId', getById)
 router.put('/books/:bookId', updateBooks)
-router.delete('/books/:bookId',authenticate,authorise, deleteBooks) 
+router.delete('/books/:bookId', deleteBooks) 
 
 module.exports=router;
