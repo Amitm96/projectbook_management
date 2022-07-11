@@ -5,7 +5,9 @@ const isValid = function (value) {
     if (typeof value === "string" && value.trim().length === 0) return false;
     return true
 }
-
+const addressValid = function(data){
+    return !(data && (typeof data == "number" || typeof data == "boolean" || data.trim().length == 0 ))
+}
 const userValidations = async function (req, res, next) {
     try {
         let data = req.body;
@@ -47,8 +49,8 @@ const userValidations = async function (req, res, next) {
             return res.status(400).send({ status: false, message: "The user phone number should be indian may contain only 10 number" });
         }
         let phone = data.phone.trim();
-        let duplicatePhone = await userModel.find({ phone: phone });
-        if (duplicatePhone.length !== 0) {
+        let duplicatePhone = await userModel.findOne({ phone: phone });
+        if (duplicatePhone) {
             return res.status(400).send({ status: false, message: `${phone} already exists` });
         }
 
@@ -61,8 +63,8 @@ const userValidations = async function (req, res, next) {
         if (!/^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(email)) {
             return res.status(400).send({ status: false, message: "Entered email is invalid" });
         }
-        let duplicateEmail = await userModel.find({ email: email });
-        if (duplicateEmail.length !== 0) {
+        let duplicateEmail = await userModel.findOne({ email: email });
+        if (duplicateEmail) {
             return res.status(400).send({ status: false, message: `${email} already exists` });
         }
 
@@ -78,23 +80,24 @@ const userValidations = async function (req, res, next) {
 
 
         // check address validations
-        if (!isValid(data.address.street)) {
-            return res.status(400).send({ status: false, message: "Please enter valid street" });
+
+        if(!addressValid(data.address.street)){
+            return res.status(400).send({status: false , message: "street value should not be a number or boolean or empty space"})
         }
         if (!/^\d*[a-zA-Z\d\s,.]*$/.test(data.address.street)) {
             return res.status(400).send({ status: false, message: "The street name may contain only letters" });
         }
-        if (!isValid(data.address.city)) {
-            return res.status(400).send({ status: false, message: "Please enter valid city" });
+        if(!addressValid(data.address.city)){
+            return res.status(400).send({status: false , message: "city value should not be a number or boolean or empty space"})
         }
         if (!/^\w[a-zA-Z.,\s]*$/.test(data.address.city)) {
             return res.status(400).send({ status: false, message: "The user name may contain only letters" });
         }
-        if (!isValid(data.address.pincode)) {
-            return res.status(400).send({ status: false, message: "Please enter valid pincode" });
+        if(!addressValid(data.address.pincode)){
+            return res.status(400).send({status: false , message: "pincode value should not be a number or boolean or empty space"})
         }
-        let pincode = data.address.pincode.trim();
-        if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+        // let pincode = data.address.pincode;
+        if (data.address.pincode != undefined && !(/^[1-9][0-9]{5}$/.test(data.address.pincode))) {
             return res.status(400).send({ status: false, message: " Please Enter Valid Pincode Of 6 Digits" });
         }
         next();
