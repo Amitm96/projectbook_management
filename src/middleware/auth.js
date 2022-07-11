@@ -1,37 +1,33 @@
 const jwt = require("jsonwebtoken");
-const booksModel = require("../model/booksModel") 
+const booksModel = require("../model/booksModel")
 
 
 
 //================================================= Authentication ==================================================//
 
 
-const authenticate = async function (req, res, next) {
-    try {
-      let token = req.headers["x-Api-Key"];
-      if (!token) {
-        token = req.headers["x-api-key"];
+const authenticate = function (req, res, next) {
+  try {
+    let token = req.headers["x-api-key"];
+
+    if (!token) return res.status(401).send({ status: false, message: "Enter token in header" });
+
+     jwt.verify(token, "4A group", (error, decodeToken) => {
+      if (error) {
+        const message =
+        error.message === "jwt expired" ? "Token is expired" : "Token is invalid"
+        return res.status(401).send({ status: false, message })
       }
-      //If no token is present in the request header return error
-      if (!token) {
-  
-        return res.status(400).send({ status: false, msg: "token must be present" });
-      }
-      // console.log(token);
-  
-      let decodedToken = jwt.verify(token, "4A group");
-  
-      if (!decodedToken) {
-        return res.status(403).send({ status: false, msg: "token is invalid" });
-      }
-    }
-    catch (error) {
-      console.log(error.message)
-      res.status(500).send({ msg: " Server Error", error: error.message })
-    }
-    next()
+      req.userId = decodeToken.userId 
+      next();
+    })
   }
-  
+  catch (err) {
+    return res.status(500).send({ status: false, message: err.message })
+  }
+}
+
+
 
 
 
@@ -40,27 +36,20 @@ const authenticate = async function (req, res, next) {
 //================================================= Authorization ==================================================//
 
 
-const authorise = async function (req, res, next) {
+const authorise = async function (req, res, next) { 
   try {
-    let token = req.headers["x-api-key"];
-    if (!token) {
-      return res.status(400).send({ status: false, msg: "token must be present" });
-    }
-    let decodedToken = jwt.verify(token, "4A group");
-
-    let bookId = req.params.bookId
+       let bookId = req.params.bookId
     let book = await booksModel.findById(bookId)
-
+ 
     if (!book) {
       return res.status(404).send({ status: false, msg: "book does not exists" })
     }
     if (book.isDeleted) {
       return res.status(404).send( {status: false, msg: "book is already deleted"} )
     }
-    
-    let userLoggedIn = decodedToken.userId
+    let id=book.userId
 
-    if (book.userId != userLoggedIn) {
+    if (req.userId != id ) {
       return res.status(403).send({ status: false, msg: 'user logged is not allowed to modify the requested users data' })
     }
     next()
@@ -71,6 +60,4 @@ const authorise = async function (req, res, next) {
 }
 
 
-
-
-module.exports = {authenticate, authorise}
+module.exports = { authenticate, authorise};

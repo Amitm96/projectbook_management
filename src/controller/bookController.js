@@ -57,30 +57,39 @@ const getBooks = async function (req, res) {
 }
 
 const getById = async function (req, res) {
+  try{
   let id = req.params.bookId
 
-  let find = await booksModel.findOne({ _id: id, isDeleted: false })
-  if (!find) {
+  let bookDetail = await booksModel.findOne({ _id: id, isDeleted: false })
+  if (!bookDetail) {
     return res.status(404).send({ status: false, message: "Book is already deleted or not present" })
   }
 
   let object = {
-    _id: find._id,
-    title: find.title,
-    excerpt: find.excerpt,
-    userId: find.userId,
-    category: find.category,
-    isDeleted: find.isDeleted,
-    reviews: find.reviews,
-    releasedAt: find.releasedAt,
-    createdAt: find.createdAt,
-    updatedAt: find.updatedAt
+    _id: bookDetail._id,
+    title: bookDetail.title,
+    excerpt: bookDetail.excerpt,
+    userId: bookDetail.userId,
+    category: bookDetail.category,
+    subcategory: bookDetail.subcategory,
+    isDeleted: bookDetail.isDeleted,
+    reviews: bookDetail.reviews,
+    releasedAt: bookDetail.releasedAt,
+    createdAt: bookDetail.createdAt,
+    updatedAt: bookDetail.updatedAt
   }
-  let review = await reviewModel.find({ bookId: id })
-
+  let review = await reviewModel.find({ bookId: id, isDeleted:false }).select({__v:0,isDeleted:0,updatedAt:0,createdAt:0})  
+  if(review){
+    object.reviews =review.length;
+  }
   object.reviewsData = review
   res.send({ status: true, message: 'Books list', data: object })
 }
+catch (err) {
+  res.status(500).send({ status: false, message: err.message })
+}
+}
+
 
 
 
@@ -117,7 +126,7 @@ const updateBooks = async function (req, res) {
     }
 
     if (isValid(title)) {
-      book.title = title
+      book.title = title 
     }
     if (isValid(excerpt)) {
       book.excerpt = excerpt
