@@ -27,10 +27,6 @@ const booksValidations = async function (req, res, next) {
 
         // Checks if title is empty or entered as a string or contains valid Title
         let title = data.title
-        let duplicatetitle = await booksModel.find({ title: title });
-        if (duplicatetitle.length !== 0) {
-            return res.status(400).send({ status: false, message: `${title} already exists` });
-        }
         if (!isValid(title)) {
             return res.status(400).send({ status: false, message: "Please Enter valid Title" });
         }
