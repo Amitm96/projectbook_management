@@ -16,16 +16,16 @@ const isValidObjectId = function (data) {
     return mongoose.Types.ObjectId.isValid(data)
 }
 
-const releasedAtregex = function(val){
+const releasedAtregex = function (val) {
     let regx = /^([12][0-9]{3})\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|[3][01])$/;
     return regx.test(val.trim())
 }
 
-const validTitle = function(val){
+const validTitle = function (val) {
     return /^\d*[a-zA-Z][a-zA-Z\d\s]*$/.test(val.trim())
 }
 
-const validISBN = function(val){
+const validISBN = function (val) {
     return /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/.test(val.trim())
 }
 
@@ -71,8 +71,8 @@ const booksValidations = async function (req, res, next) {
         if (!isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Please Enter userId as a valid objectId" });
         }
-        if(userId != req.userId){
-            return res.status(403).send({status:false, message:"Unauthorised access"})
+        if (userId != req.userId) {
+            return res.status(403).send({ status: false, message: "Unauthorised access" })
         }
         // Checks whether userId is present in user collection or not
         let checkuserId = await userModel.findById(userId);
@@ -91,14 +91,14 @@ const booksValidations = async function (req, res, next) {
         ISBN = ISBN.trim();
         let validISBN = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/;
         if (!validISBN.test(ISBN)) {
-            return res.status(400).send({ status: false, message: "The ISBN may contain only numbers in string" });
+            return res.status(400).send({ status: false, message: "The ISBN may contain only numbers in string and of 13 digit only" });
         }
 
         let duplicateISBN = await booksModel.findOne({ ISBN: ISBN });
         if (duplicateISBN) {
             return res.status(400).send({ status: false, message: `${ISBN} already exists` });
         }
-        
+
         // Checks if category is empty or entered as a string or contains valid Category
         if (!isValid(data.category)) {
             return res.status(400).send({ status: false, message: "Please Enter valid Category" });
@@ -111,25 +111,25 @@ const booksValidations = async function (req, res, next) {
 
 
         // Checks if subCategory is empty or entered as a string or contains valid subCategory
-        
+
         if (!isValid(data.subcategory)) {
             return res.status(400).send({ status: false, message: "Please Enter valid subcategory" });
         }
         if (data.subcategory) {
-            if (Array.isArray(data.subcategory)) { 
+            if (Array.isArray(data.subcategory)) {
                 req.body["subcategory"] = [...data.subcategory]
             }
             if (Object.prototype.toString.call(data.subcategory) === "[object String]") {
-                let subcat= data.subcategory.split(",").map(x=>x.trim())
+                let subcat = data.subcategory.split(",").map(x => x.trim())
                 req.body["subcategory"] = subcat
             }
         }
 
-        if(!isValid(data.releasedAt)) {
-            return res.status(400).send({status: false , message: "realesd at date must be present"})
+        if (!isValid(data.releasedAt)) {
+            return res.status(400).send({ status: false, message: "releasedAt date must be present" })
         }
-        if(data.releasedAt && !releasedAtregex(data.releasedAt)){
-            return res.status(400).send({status: false , message: "realesdAt should be in YYYY-MM-DD format"})
+        if (data.releasedAt && !releasedAtregex(data.releasedAt)) {
+            return res.status(400).send({ status: false, message: "releasedAt should be in YYYY-MM-DD format" })
         }
 
         next();
@@ -140,4 +140,4 @@ const booksValidations = async function (req, res, next) {
     }
 };
 
-module.exports = { booksValidations, isValid, isValidBody, isValidObjectId, validTitle , validISBN , releasedAtregex };
+module.exports = { booksValidations, isValid, isValidBody, isValidObjectId, validTitle, validISBN, releasedAtregex };

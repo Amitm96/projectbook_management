@@ -5,8 +5,8 @@ const isValid = function (value) {
     if (typeof value === "string" && value.trim().length === 0) return false;
     return true
 }
-const addressValid = function(data){
-    return !(data && (typeof data == "number" || typeof data == "boolean" || data.trim().length == 0 ))
+const addressValid = function (data) {
+    return !(data && (typeof data == "number" || typeof data == "boolean" || data.trim().length == 0))
 }
 const userValidations = async function (req, res, next) {
     try {
@@ -81,27 +81,27 @@ const userValidations = async function (req, res, next) {
 
         // check address validations
 
-        if(!addressValid(data.address.street)){
-            return res.status(400).send({status: false , message: "street value should not be a number or boolean or empty space"})
+        if (!addressValid(data.address.street)) {
+            return res.status(400).send({ status: false, message: "street value should not be a number or boolean or empty space" })
         }
         if (!/^\d*[a-zA-Z\d\s,.]*$/.test(data.address.street)) {
             return res.status(400).send({ status: false, message: "The street name may contain only letters" });
         }
-        if(!addressValid(data.address.city)){
-            return res.status(400).send({status: false , message: "city value should not be a number or boolean or empty space"})
+        if (!addressValid(data.address.city)) {
+            return res.status(400).send({ status: false, message: "city value should not be a number or boolean or empty space" })
         }
         if (!/^\w[a-zA-Z.,\s]*$/.test(data.address.city)) {
-            return res.status(400).send({ status: false, message: "The user name may contain only letters" });
+            return res.status(400).send({ status: false, message: "The city name may contain only letters" });
         }
-        if(!addressValid(data.address.pincode)){
-            return res.status(400).send({status: false , message: "pincode value should not be a number or boolean or empty space"})
+        if (!addressValid(data.address.pincode)) {
+            return res.status(400).send({ status: false, message: "pincode value should not be a number or boolean or empty space" })
         }
-        // let pincode = data.address.pincode;
+         data.address.pincode = data.address.pincode.trim();
         if (data.address.pincode != undefined && !(/^[1-9][0-9]{5}$/.test(data.address.pincode))) {
             return res.status(400).send({ status: false, message: " Please Enter Valid Pincode Of 6 Digits" });
         }
         next();
-    } 
+    }
     catch (error) {
         console.log(error);
         res.status(500).send({ status: false, message: error.message });

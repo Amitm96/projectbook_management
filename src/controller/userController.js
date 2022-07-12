@@ -29,20 +29,29 @@ const loginUser = async function (req, res) {
     let data = req.body
     let email = req.body.email
     let password = req.body.password
+  
     if (Object.keys(data).length == 0) {
       return res.status(400).send({ status: false, message: "Body cannot be empty" });
     }
+
+    // Checks whether email is entered or not
+ if (!email) return res.status(400).send({ status: false, msg: "Please enter E-mail"});
+ 
+  // Checks whether password is entered or not
+ if (!password) return res.status(400).send({ status: false, msg: "Please enter Password" }); 
+ 
+
     //Finding credentials 
     let user = await userModel.findOne({ email: email, password: password })
     if (!user) {
-      return res.status(404).send({ status: false, msg: "Invalid email or password" })
+      return res.status(401).send({ status: false, msg: "Invalid email or password" })
     }
 
     //Token generation
     let token = jwt.sign({
       userId: user._id.toString(),
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 7200
+      exp: Math.floor(Date.now() / 1000) + 7600
     },
       "4A group"
     );
