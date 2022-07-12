@@ -2,7 +2,7 @@ const booksModel = require("../model/booksModel");
 const reviewModel = require("../model/reviewModel");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId
-const { isValidBody, isValid, isValidObjectId } = require('../validations/bookValidations')
+const { isValidBody, isValid, isValidObjectId, validISBN, releasedAtregex, validTitle } = require('../validations/bookValidations')
 
 
 //=========================================== 1-Create Book Api ====================================================//
@@ -57,37 +57,39 @@ const getBooks = async function (req, res) {
 }
 
 const getById = async function (req, res) {
-  try{
-  let id = req.params.bookId
+  try {
+    let id = req.params.bookId
+    if(!mongoose.isValidObjectId(id)){
+      return res.status(400).send({status:false, message:"Use valid bookId"})
+    }
+    let bookDetail = await booksModel.findOne({ _id: id, isDeleted: false })
+    if (!bookDetail) {
+      return res.status(404).send({ status: false, message: "Book is already deleted or no any document found" })
+    }
 
-  let bookDetail = await booksModel.findOne({ _id: id, isDeleted: false })
-  if (!bookDetail) {
-    return res.status(404).send({ status: false, message: "Book is already deleted or not present" })
+    let object = {
+      _id: bookDetail._id,
+      title: bookDetail.title,
+      excerpt: bookDetail.excerpt,
+      userId: bookDetail.userId,
+      category: bookDetail.category,
+      subcategory: bookDetail.subcategory,
+      isDeleted: bookDetail.isDeleted,
+      reviews: bookDetail.reviews,
+      releasedAt: bookDetail.releasedAt,
+      createdAt: bookDetail.createdAt,
+      updatedAt: bookDetail.updatedAt
+    }
+    let review = await reviewModel.find({ bookId: id, isDeleted: false }).select({ __v: 0, isDeleted: 0, updatedAt: 0, createdAt: 0 })
+    if (review) {
+      object.reviews = review.length;
+    }
+    object.reviewsData = review
+    res.send({ status: true, message: 'Books list', data: object })
   }
-
-  let object = {
-    _id: bookDetail._id,
-    title: bookDetail.title,
-    excerpt: bookDetail.excerpt,
-    userId: bookDetail.userId,
-    category: bookDetail.category,
-    subcategory: bookDetail.subcategory,
-    isDeleted: bookDetail.isDeleted,
-    reviews: bookDetail.reviews,
-    releasedAt: bookDetail.releasedAt,
-    createdAt: bookDetail.createdAt,
-    updatedAt: bookDetail.updatedAt
+  catch (err) {
+    res.status(500).send({ status: false, message: err.message })
   }
-  let review = await reviewModel.find({ bookId: id, isDeleted:false }).select({__v:0,isDeleted:0,updatedAt:0,createdAt:0})  
-  if(review){
-    object.reviews =review.length;
-  }
-  object.reviewsData = review
-  res.send({ status: true, message: 'Books list', data: object })
-}
-catch (err) {
-  res.status(500).send({ status: false, message: err.message })
-}
 }
 
 
@@ -96,15 +98,11 @@ catch (err) {
 
 const updateBooks = async function (req, res) {
   try {
+    let bookId = req.params.bookId
+    
+    let { title, excerpt, releasedAt, ISBN } = req.body
     if (!isValidBody(req.body)) {
       return res.status(400).send({ status: false, message: "enter data to be updated" })
-    }
-
-    let { title, excerpt, releasedAt, ISBN } = req.body
-    let bookId = req.params.bookId
-
-    if (!isValidObjectId(bookId)) {
-      return res.status(400).send({ status: false, message: "please enter valid bookid" })
     }
 
     let book = await booksModel.findById(bookId)
@@ -125,18 +123,20 @@ const updateBooks = async function (req, res) {
       return res.status(400).send({ status: false, message: "Given isbn is already present, Please use Another one" })
     }
 
-    if (isValid(title)) {
-      book.title = title 
-    }
+    if (isValid(title) && validTitle(title)) {
+      book.title = title
+    } else return res.status(400).send({status:false, message:"enter valid title"})
     if (isValid(excerpt)) {
       book.excerpt = excerpt
     }
-    if (isValid(releasedAt)) {
+    if (isValid(releasedAt) && releasedAtregex(releasedAt)) {
       book.releasedAt = releasedAt
-    }
-    if (isValid(ISBN)) {
-      book.ISBN = ISBN
-    }
+    }else return res.status(400).send({status:false, message:"enter valid date format"})
+
+    if (isValid(ISBN) && validISBN(ISBN)) {
+      book.ISBN = ISBN 
+    } else return res.status(400).send({status:false, message:"enter valid ISBN"})
+
     book.save()
     res.status(200).send({ status: true, message: "success", data: book })
   }

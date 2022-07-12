@@ -4,7 +4,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const reviewSchema = new mongoose.Schema({
 
     bookId: {
-        type: ObjectId, 
+        type: ObjectId,
         required: true,
         ref: 'Book'
     },
@@ -29,6 +29,7 @@ const reviewSchema = new mongoose.Schema({
     review: {
         type: String
     },
+    
     isDeleted: {
         type: Boolean,
         default: false
