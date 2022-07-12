@@ -9,25 +9,20 @@ const createReview = async function (req, res) {
 
         let data = req.body;
         const { reviewedBy, reviewedAt, rating, review } = data
-        data.reviewedAt = Date.now()
 
+        data.reviewedAt = Date.now()
         data.bookId = req.params.bookId;
-        
-        
+
         let save = await reviewModel.create(data);
 
-        
-        
         let forLength = await reviewModel.find({ isDeleted: false, bookId: data.bookId })
 
-
-        // console.log(find.length)
         let find = await booksModel.findOneAndUpdate({ isDeleted: false, _id: data.bookId }, { $set: { reviews: forLength.length } }, { new: true })
-        console.log(find.reviews)
+
         if (!find) {
             return res.status(404).send({ status: false, msg: "book id not exist" })
         }
-       
+
         find.reviews = forLength.length
         let object = {
             _id: find._id,
@@ -44,8 +39,6 @@ const createReview = async function (req, res) {
             reviewsData: {}
         }
 
-        //let save = await reviewModel.create(data);
-
         if (save) {
             object.reviewsData._id = save._id
             object.reviewsData.bookId = save.bookId
@@ -53,15 +46,10 @@ const createReview = async function (req, res) {
             object.reviewsData.reviewedAt = save.reviewedAt
             object.reviewsData.rating = save.rating
             object.reviewsData.review = save.review
-           
         }
-
-       
         return res.status(201).send({ status: true, data: object })
-
-
-
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).send({ status: false, msg: error.message })
     }
 }
@@ -73,7 +61,7 @@ const updateReview = async function (req, res) {
     if (!mongoose.isValidObjectId(bookId)) {
         return res.status(400).send({ status: false, message: "write valid book id" });
     }
-    if (!mongoose.isValidObjectId(reviewId)) { 
+    if (!mongoose.isValidObjectId(reviewId)) {
         return res.status(400).send({ status: false, message: "write valid review Id" });
     }
 
@@ -88,7 +76,7 @@ const updateReview = async function (req, res) {
     if (!update) {
         return res.status(404).send({ status: false, msg: "reviewId not found" })
     }
-    console.log(update) 
+    console.log(update)
     let object = {
         _id: find._id,
         title: find.title,
@@ -124,24 +112,20 @@ let deleteReview = async function (req, res) {
         if (!book) {
             return res.status(404).send({ status: false, message: "book is not present or deleted" })
         }
-        
-        let review = await reviewModel.findOne({ _id: rId , isDeleted: false }) 
+
+        let review = await reviewModel.findOne({ _id: rId, isDeleted: false })
         if (!review) {
             return res.status(404).send({ status: false, message: "review is not present or deleted" })
         }
 
-    
         if (review.bookId != bId) {
             return res.status(400).send({ status: false, message: "enter correct reviewid for the book" })
         }
-        
-       
-            review.isDeleted = true
-            review.save()
-        
-        let deleted = await booksModel.findOneAndUpdate({_id:bId},{$set:{reviews:previousReview-1}},{new:true})
-        
-        
+
+        review.isDeleted = true
+        review.save()
+        let deleted = await booksModel.findOneAndUpdate({ _id: bId }, { $set: { reviews: previousReview - 1 } }, { new: true })
+
         res.status(200).send({ status: true, message: "review deleted successfully" })
     }
     catch (err) {
