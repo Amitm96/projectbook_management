@@ -81,6 +81,12 @@ const userValidations = async function (req, res, next) {
 
         // check address validations
 
+        if (Object.keys(data.address).length == 0) {
+            return res.status(400).send({ status: false, message: "Address cannot be empty" });
+        }
+        if (typeof data.address != "object") {
+            return res.status(400).send({ status: false, msg: "Address body  should be in object form" });
+        }
         if (!addressValid(data.address.street)) {
             return res.status(400).send({ status: false, message: "street value should not be a number or boolean or empty space" })
         }
@@ -96,7 +102,7 @@ const userValidations = async function (req, res, next) {
         if (!addressValid(data.address.pincode)) {
             return res.status(400).send({ status: false, message: "pincode value should not be a number or boolean or empty space" })
         }
-         data.address.pincode = data.address.pincode.trim();
+        data.address.pincode = data.address.pincode;
         if (data.address.pincode != undefined && !(/^[1-9][0-9]{5}$/.test(data.address.pincode))) {
             return res.status(400).send({ status: false, message: " Please Enter Valid Pincode Of 6 Digits" });
         }
