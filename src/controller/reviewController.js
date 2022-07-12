@@ -56,43 +56,47 @@ const createReview = async function (req, res) {
 
 
 const updateReview = async function (req, res) {
-    let bookId = req.params.bookId;
-    let reviewId = req.params.reviewId
-    if (!mongoose.isValidObjectId(bookId)) {
-        return res.status(400).send({ status: false, message: "write valid book id" });
-    }
-    if (!mongoose.isValidObjectId(reviewId)) {
-        return res.status(400).send({ status: false, message: "write valid review Id" });
-    }
+    try {
+        let bookId = req.params.bookId;
+        let reviewId = req.params.reviewId
+        if (!mongoose.isValidObjectId(bookId)) {
+            return res.status(400).send({ status: false, message: "write valid book id" });
+        }
+        if (!mongoose.isValidObjectId(reviewId)) {
+            return res.status(400).send({ status: false, message: "write valid review Id" });
+        }
 
-    body = req.body;
-    const { review, reviewedBy, rating } = body
-    let find = await booksModel.findOne({ isDeleted: false, _id: bookId })
-    if (!find) {
-        res.status(404).send({ status: false, msg: "book id not exist" })
-    }
+        body = req.body;
+        const { review, reviewedBy, rating } = body
+        let find = await booksModel.findOne({ isDeleted: false, _id: bookId })
+        if (!find) {
+            res.status(404).send({ status: false, msg: "book id not exist" })
+        }
 
-    let update = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId, isDeleted: false }, { $set: { reviewedBy, rating, review } }, { new: true }).select({ _id: 1, bookId: 1, review: 1, reviewedBy: 1, reviewedAt: 1, rating: 1 })
-    if (!update) {
-        return res.status(404).send({ status: false, msg: "reviewId not found" })
-    }
-    console.log(update)
-    let object = {
-        _id: find._id,
-        title: find.title,
-        excerpt: find.excerpt,
-        userId: find.userId,
-        category: find.category,
-        isDeleted: find.isDeleted,
-        reviews: find.reviews,
-        releasedAt: find.releasedAt,
-        createdAt: find.createdAt,
-        updatedAt: find.updatedAt
-    }
-    object.reviewsData = update
+        let update = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId, isDeleted: false }, { $set: { reviewedBy, rating, review } }, { new: true }).select({ _id: 1, bookId: 1, review: 1, reviewedBy: 1, reviewedAt: 1, rating: 1 })
+        if (!update) {
+            return res.status(404).send({ status: false, msg: "reviewId not found" })
+        }
+        console.log(update)
+        let object = {
+            _id: find._id,
+            title: find.title,
+            excerpt: find.excerpt,
+            userId: find.userId,
+            category: find.category,
+            isDeleted: find.isDeleted,
+            reviews: find.reviews,
+            releasedAt: find.releasedAt,
+            createdAt: find.createdAt,
+            updatedAt: find.updatedAt
+        }
+        object.reviewsData = update
 
-    return res.status(200).send({ status: true, message: 'Books list', data: object })
-
+        return res.status(200).send({ status: true, message: 'Books list', data: object })
+    }
+    catch (err) {
+        res.status(500).send({ status: false, message: err.message })
+    }
 }
 
 let deleteReview = async function (req, res) {
