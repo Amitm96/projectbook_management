@@ -10,6 +10,7 @@ const createReview = async function (req, res) {
         data.reviewedAt = Date.now()
         data.reviewedBy = data.reviewedBy;
         data.bookId = req.params.bookId;
+        
 
         let save = await reviewModel.create(data);
         let find = {
@@ -20,7 +21,12 @@ const createReview = async function (req, res) {
             rating: save.rating,
             review: save.review
         }
-        res.status(201).send({ status: true, data: find })
+        let reviews = await reviewModel.find({bookId : data.bookId , isDeleted: false})
+        let book = await booksModel.findOneAndUpdate({_id: data.bookId , isDeleted: false} , {$set: {reviews : reviews.length} } , {new: true})
+        // console.log(book)
+        object = {...book.toJSON()}
+        object.reviewsData = find
+        res.status(201).send({ status: true, data: object })
 
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message })
@@ -79,7 +85,7 @@ let deleteReview = async function (req, res) {
         if (!book) {
             return res.status(404).send({ status: false, message: "book is not present or deleted" })
         }
-
+        
         let review = await reviewModel.findOne({ _id: rId, isDeleted: false })
         if (!review) {
             return res.status(404).send({ status: false, message: "review is not present or deleted" })
@@ -91,6 +97,7 @@ let deleteReview = async function (req, res) {
 
         review.isDeleted = true
         review.save()
+        book.save()
         res.status(200).send({ status: true, message: "review deleted successfully" })
     }
     catch (err) {
