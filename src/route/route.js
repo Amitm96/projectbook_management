@@ -24,7 +24,7 @@ router.delete('/books/:bookId/review/:reviewId', deleteReview)
 router.put('/books/:bookId/review/:reviewId', updateReview)
 
 router.all('/**', function(req, res){
-    res.status(404).send({status: false, messsage:"request not available"})
+    res.status(400).send({status: false, messsage:"invalid http request"})
 })
 
 module.exports = router;

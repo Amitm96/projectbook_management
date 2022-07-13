@@ -93,7 +93,7 @@ const booksValidations = async function (req, res, next) {
         if (!validISBN.test(ISBN)) {
             return res.status(400).send({ status: false, message: "The ISBN may contain only numbers in string and of 13 digit only" });
         }
-
+ 
         let duplicateISBN = await booksModel.findOne({ ISBN: ISBN });
         if (duplicateISBN) {
             return res.status(400).send({ status: false, message: `${ISBN} already exists` });

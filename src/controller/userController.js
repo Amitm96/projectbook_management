@@ -14,7 +14,7 @@ const createUser = async function (req, res) {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send({ status: false, msg: err.message })
+   return res.status(500).send({ status: false, msg: err.message })
   }
 }
 
@@ -29,17 +29,17 @@ const loginUser = async function (req, res) {
     let data = req.body
     let email = req.body.email
     let password = req.body.password
-  
+
     if (Object.keys(data).length == 0) {
       return res.status(400).send({ status: false, message: "Body cannot be empty" });
     }
 
     // Checks whether email is entered or not
- if (!email) return res.status(400).send({ status: false, msg: "Please enter E-mail"});
- 
-  // Checks whether password is entered or not
- if (!password) return res.status(400).send({ status: false, msg: "Please enter Password" }); 
- 
+    if (!email) return res.status(400).send({ status: false, msg: "Please enter E-mail" });
+
+    // Checks whether password is entered or not
+    if (!password) return res.status(400).send({ status: false, msg: "Please enter Password" });
+
 
     //Finding credentials 
     let user = await userModel.findOne({ email: email, password: password })
@@ -60,7 +60,7 @@ const loginUser = async function (req, res) {
     res.status(200).send({ status: true, data: { token } });
   }
   catch (err) {
-    res.status(500).send({ status: false, msg: err.message })
+    return res.status(500).send({ status: false, msg: err.message })
   }
 };
 
