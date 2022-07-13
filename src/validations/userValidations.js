@@ -73,14 +73,14 @@ const userValidations = async function (req, res, next) {
         if (!isValid(data.password)) {
             return res.status(400).send({ status: false, message: "Please enter valid Password" });
         }
-        let validPassword = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+        let validPassword = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,15}$/;
         if (!validPassword.test(data.password)) {
             return res.status(400).send({ status: false, message: "Please enter min 8 letter password, with at least a symbol, upper and lower case letters and a number" });
         }
 
 
         // check address validations
-
+        if(data.address){
         if (Object.keys(data.address).length == 0) {
             return res.status(400).send({ status: false, message: "Address cannot be empty" });
         }
@@ -105,7 +105,7 @@ const userValidations = async function (req, res, next) {
         data.address.pincode = data.address.pincode;
         if (data.address.pincode != undefined && !(/^[1-9][0-9]{5}$/.test(data.address.pincode))) {
             return res.status(400).send({ status: false, message: " Please Enter Valid Pincode Of 6 Digits" });
-        }
+        }}
         next();
     }
     catch (error) {

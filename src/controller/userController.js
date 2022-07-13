@@ -14,7 +14,7 @@ const createUser = async function (req, res) {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send({ status: false, msg: err.message })
+   return res.status(500).send({ status: false, msg: err.message })
   }
 }
 
@@ -60,7 +60,7 @@ const loginUser = async function (req, res) {
     res.status(200).send({ status: true, data: { token } });
   }
   catch (err) {
-    res.status(500).send({ status: false, msg: err.message })
+    return res.status(500).send({ status: false, msg: err.message })
   }
 };
 

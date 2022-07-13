@@ -23,7 +23,6 @@ const createReview = async function (req, res) {
             return res.status(404).send({ status: false, msg: "book id not exist" })
         }
 
-        find.reviews = forLength.length
         let object = {
             _id: find._id,
             title: find.title,
@@ -50,7 +49,7 @@ const createReview = async function (req, res) {
         return res.status(201).send({ status: true, data: object })
     }
     catch (error) {
-        res.status(500).send({ status: false, msg: error.message })
+       return res.status(500).send({ status: false, msg: error.message })
     }
 }
 
@@ -70,7 +69,7 @@ const updateReview = async function (req, res) {
         const { review, reviewedBy, rating } = body
         let find = await booksModel.findOne({ isDeleted: false, _id: bookId })
         if (!find) {
-            res.status(404).send({ status: false, msg: "book id not exist" })
+            return res.status(404).send({ status: false, msg: "book id not exist" })
         }
 
         let update = await reviewModel.findOneAndUpdate({ _id: reviewId, bookId: bookId, isDeleted: false }, { $set: { reviewedBy, rating, review } }, { new: true }).select({ _id: 1, bookId: 1, review: 1, reviewedBy: 1, reviewedAt: 1, rating: 1 })
@@ -95,7 +94,7 @@ const updateReview = async function (req, res) {
         return res.status(200).send({ status: true, message: 'Books list', data: object })
     }
     catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+       return res.status(500).send({ status: false, message: err.message })
     }
 }
 
@@ -133,7 +132,7 @@ let deleteReview = async function (req, res) {
         res.status(200).send({ status: true, message: "review deleted successfully" })
     }
     catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+        return res.status(500).send({ status: false, message: err.message })
     }
 
 }

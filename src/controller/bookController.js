@@ -16,7 +16,7 @@ const createBook = async function (req, res) {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send({ status: false, msg: err.message })
+    return res.status(500).send({ status: false, msg: err.message })
   }
 }
 
@@ -52,7 +52,7 @@ const getBooks = async function (req, res) {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send({ status: false, msg: err.message })
+    return res.status(500).send({ status: false, msg: err.message })
   }
 }
 
@@ -91,7 +91,7 @@ const getById = async function (req, res) {
     res.send({ status: true, message: 'Books list', data: object })
   }
   catch (err) {
-    res.status(500).send({ status: false, message: err.message })
+    return res.status(500).send({ status: false, message: err.message })
   }
 }
 
@@ -144,7 +144,7 @@ const updateBooks = async function (req, res) {
     res.status(200).send({ status: true, message: "success", data: book })
   }
   catch (err) {
-    res.status(500).send({ status: false, message: err.message })
+   return res.status(500).send({ status: false, message: err.message })
   }
 }
 
@@ -169,7 +169,7 @@ let deleteBooks = async function (req, res) {
 
   }
   catch (err) {
-    res.status(500).send({ status: false, msg: err.message });
+    return res.status(500).send({ status: false, msg: err.message });
   }
 }
 
