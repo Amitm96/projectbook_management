@@ -74,7 +74,7 @@ const updateReview = async function (req, res) {
         if (!update) {
             return res.status(404).send({ status: false, msg: "reviewId not found" })
         }
-        console.log(update)
+        // console.log(update)
         let object = {
             _id: find._id,
             title: find.title,

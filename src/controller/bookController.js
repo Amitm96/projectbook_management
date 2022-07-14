@@ -30,8 +30,8 @@ let uploadFile = async (file) => {
       if (err) {
         return reject({ "error": err })
       }
-      console.log(data)
-      console.log("file uploaded succesfully")
+      // console.log(data)
+      // console.log("file uploaded succesfully")
       return resolve(data.Location)
     })
 
@@ -175,17 +175,17 @@ const updateBooks = async function (req, res) {
 
     if (isValid(title) && validTitle(title)) {
       book.title = title
-    } else return res.status(400).send({ status: false, message: "enter valid title" })
+    } 
     if (isValid(excerpt)) {
       book.excerpt = excerpt
     }
     if (isValid(releasedAt) && releasedAtregex(releasedAt)) {
       book.releasedAt = releasedAt
-    } else return res.status(400).send({ status: false, message: "enter valid date format" })
+    } 
 
     if (isValid(ISBN) && validISBN(ISBN)) {
       book.ISBN = ISBN
-    } else return res.status(400).send({ status: false, message: "enter valid ISBN" })
+    } 
 
     book.save()
     res.status(200).send({ status: true, message: "success", data: book })
