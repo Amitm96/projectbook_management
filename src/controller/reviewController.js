@@ -7,8 +7,7 @@ const mongoose = require("mongoose");
 const createReview = async function (req, res) {
     try {
 
-        let data = req.body;
-        const { reviewedBy, reviewedAt, rating, review } = data
+        let data = req.body;       
 
         data.reviewedAt = Date.now()
         data.bookId = req.params.bookId;
