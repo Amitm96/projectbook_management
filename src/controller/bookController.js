@@ -3,14 +3,64 @@ const reviewModel = require("../model/reviewModel");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId
 const { isValidBody, isValid, isValidObjectId, validISBN, releasedAtregex, validTitle } = require('../validations/bookValidations')
-
+const aws= require("aws-sdk")
 
 //=========================================== 1-Create Book Api ====================================================//
+
+aws.config.update({
+  accessKeyId: "AKIAY3L35MCRVFM24Q7U",
+  secretAccessKey: "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",
+  region: "ap-south-1"
+}) 
+
+let uploadFile = async (file) => {
+  return new Promise(function (resolve, reject) {
+    // this function will upload file to aws and return the link
+    let s3 = new aws.S3({ apiVersion: '2006-03-01' }); // we will be using the s3 service of aws
+
+    var uploadParams = {
+      ACL: "public-read",
+      Bucket: "classroom-training-bucket",  //HERE
+      Key: "anil/" + file.originalname, //HERE 
+      Body: file.buffer
+    }
+
+
+    s3.upload(uploadParams, function (err, data) {
+      if (err) {
+        return reject({ "error": err })
+      }
+      console.log(data)
+      console.log("file uploaded succesfully")
+      return resolve(data.Location)
+    })
+
+  })
+}
+
+
+
+
 
 
 const createBook = async function (req, res) {
   try {
     const data = req.body;
+    // console.log(data)
+    // console.log(req.files) 
+
+    let files = req.files
+    if (files && files.length > 0) {
+      //upload to s3 and get the uploaded link
+      // res.send the link back to frontend/postman
+      let uploadedFileURL = await uploadFile(files[0])
+      data.bookCover=uploadedFileURL
+      // res.status(201).send({ msg: "file uploaded succesfully", data: uploadedFileURL })
+    }
+    else {
+      res.status(400).send({ msg: "No file found" })
+    }
+
     let savedData = await booksModel.create(data)
     res.status(201).send({ status: true, data: savedData })
   }
@@ -62,8 +112,8 @@ const getBooks = async function (req, res) {
 const getById = async function (req, res) {
   try {
     let id = req.params.bookId
-    if(!mongoose.isValidObjectId(id)){
-      return res.status(400).send({status:false, message:"Use valid bookId"})
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).send({ status: false, message: "Use valid bookId" })
     }
     let bookDetail = await booksModel.findOne({ _id: id, isDeleted: false })
     if (!bookDetail) {
@@ -102,7 +152,7 @@ const getById = async function (req, res) {
 const updateBooks = async function (req, res) {
   try {
     let bookId = req.params.bookId
-    
+
     let { title, excerpt, releasedAt, ISBN } = req.body
     if (!isValidBody(req.body)) {
       return res.status(400).send({ status: false, message: "enter data to be updated" })
@@ -128,29 +178,29 @@ const updateBooks = async function (req, res) {
 
     if (isValid(title) && validTitle(title)) {
       book.title = title
-    } else return res.status(400).send({status:false, message:"enter valid title"})
+    } else return res.status(400).send({ status: false, message: "enter valid title" })
     if (isValid(excerpt)) {
       book.excerpt = excerpt
     }
     if (isValid(releasedAt) && releasedAtregex(releasedAt)) {
       book.releasedAt = releasedAt
-    }else return res.status(400).send({status:false, message:"enter valid date format"})
+    } else return res.status(400).send({ status: false, message: "enter valid date format" })
 
     if (isValid(ISBN) && validISBN(ISBN)) {
-      book.ISBN = ISBN 
-    } else return res.status(400).send({status:false, message:"enter valid ISBN"})
+      book.ISBN = ISBN
+    } else return res.status(400).send({ status: false, message: "enter valid ISBN" })
 
     book.save()
     res.status(200).send({ status: true, message: "success", data: book })
   }
   catch (err) {
-   return res.status(500).send({ status: false, message: err.message })
+    return res.status(500).send({ status: false, message: err.message })
   }
 }
 
 
 
-//====================================== 6-DeletedBooks By Path Param Id =============================================//
+//====================================== 6-DeletedBooks By Path Param Id =========================================//
 
 
 let deleteBooks = async function (req, res) {

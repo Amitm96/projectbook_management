@@ -11,9 +11,9 @@ const { createReviewValidations } = require('../validations/reviewValidation');
 
 
 router.post('/register', userValidations, createUser)
-router.post('/login', loginUser)
+router.post('/login', loginUser) 
 
-router.post('/books', authenticate, booksValidations, createBook)
+router.post('/books',authenticate,booksValidations, createBook)
 router.get('/books', authenticate, getBooks)
 router.get('/books/:bookId', authenticate, getById)
 router.put('/books/:bookId', authenticate, authorise, updateBooks)

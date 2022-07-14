@@ -55,7 +55,7 @@ const loginUser = async function (req, res) {
     },
       "4A group"
     );
-    res.setHeader("x-api-key", token);
+    // res.setHeader("x-api-key", token);
 
     res.status(200).send({ status: true, data: { token } });
   }
