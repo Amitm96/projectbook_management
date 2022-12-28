@@ -6,7 +6,7 @@ const app = express();
 const multer = require('multer')
 
 app.use(multer().any())
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
 
 
 mongoose.connect("mongodb+srv://AkshayMakwana:Akshay123@cluster0.zmta9.mongodb.net/group5Database-DB?retryWrites=true&w=majority", {
